@@ -26,8 +26,17 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-}, { timestamps: true })
+    verificationToken: {
+        type: String,
+        default: "",
+        unique: true
+    },
+    verificationTokenExpiration: {
+        type: Number,
+        default: 0
+    }
+}, { timestamps: true });
 
-const userModel = mongoose.model.user || mongoose.model("User", userSchema)
+const userModel = mongoose.model.user || mongoose.model("User", userSchema);
 
 export default userModel;

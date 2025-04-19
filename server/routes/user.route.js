@@ -1,15 +1,18 @@
-import {Router} from "express"
+import { Router } from "express";
 import { 
     loginController, 
     logoutController, 
-    registerController 
-} from "../controllers/user.controller.js"
+    registerController, 
+    verifyUserController, 
+    resendVerificationController,
+} from "../controllers/user.controller.js";
 
-const userRoutes = Router()
+const userRoutes = Router();
 
-userRoutes.post("/register", registerController)
-userRoutes.post("/login", loginController)
-userRoutes.post("/logout", logoutController)
+userRoutes.post("/register", registerController);
+userRoutes.get("/verify-user/:token", verifyUserController);
+userRoutes.post("/resend-verification", resendVerificationController);
+userRoutes.post("/login", loginController);
+userRoutes.post("/logout", logoutController);
 
-
-export default userRoutes
+export default userRoutes;
