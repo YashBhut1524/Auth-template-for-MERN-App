@@ -94,8 +94,8 @@ export const registerController = async (req, res) => {
 };
 
 export const verifyUserController = async (req, res) => {
-    const { token } = req.params; 
-    
+    const { token } = req.params;
+
     if (!token) {
         return res.status(400).json({
             success: false,
@@ -106,7 +106,7 @@ export const verifyUserController = async (req, res) => {
     try {
         // Find the user by the verification token
         const user = await userModel.findOne({ verificationToken: token });
-        
+
         if (!user) {
             return res.status(400).json({
                 success: false,
@@ -114,7 +114,7 @@ export const verifyUserController = async (req, res) => {
             });
         }
 
-        if(user.isVerified) {
+        if (user.isVerified) {
             return res.status(400).json({
                 success: false,
                 message: "User is already verified."
@@ -131,7 +131,7 @@ export const verifyUserController = async (req, res) => {
 
         // Mark the user as verified
         user.isVerified = true;
-        user.verificationToken = ""; 
+        user.verificationToken = "";
         user.verificationTokenExpiration = "";
         await user.save();
 
@@ -244,29 +244,32 @@ export const loginController = async (req, res) => {
 
 export const logoutController = async (req, res) => {
     try {
+        // Clear both accessToken and refreshToken cookies from the client's browser
         res.clearCookie("accessToken", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "None"
-        })
+            secure: process.env.NODE_ENV === "production", // Ensure secure cookie in production
+            sameSite: "None", // Cross-origin support
+            path: "/", // Make sure to clear the cookie across all paths
+        });
+
         res.clearCookie("refreshToken", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "None"
-        })
+            secure: process.env.NODE_ENV === "production", // Ensure secure cookie in production
+            sameSite: "None", // Cross-origin support
+            path: "/", // Make sure to clear the cookie across all paths
+        });
 
         return res.status(200).json({
             success: true,
-            message: "Logged out successfully"
+            message: "Logged out successfully",
         });
-
     } catch (error) {
         return res.status(500).json({
-            message: error.message || error,
             success: false,
-        })
+            message: error.message || "Internal server error",
+        });
     }
-}
+};
 
 export const resendVerificationController = async (req, res) => {
     const { email } = req.body;
@@ -330,3 +333,15 @@ export const resendVerificationController = async (req, res) => {
         });
     }
 };
+
+// We are using middelware before this to check Au
+export const isAuthenticated = async (req, res) => {
+    try {
+        return res.status(200).json({ success: true })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
