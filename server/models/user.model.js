@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    verifiedResetOTP: {
+        type: Boolean,
+        default: false
+    },
     verificationToken: {
         type: String,
         default: "",

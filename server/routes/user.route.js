@@ -6,6 +6,10 @@ import {
     verifyUserController, 
     resendVerificationController,
     isAuthenticated,
+    refreshTokenController,
+    sendResetPasswordOTPController,
+    verifyForgotPasswordOTPController,
+    setNewPassword,
 } from "../controllers/user.controller.js";
 import AuthMiddleware from "../middleware/authMiddleware.js";
 
@@ -17,5 +21,9 @@ userRoutes.post("/resend-verification", resendVerificationController);
 userRoutes.post("/login", loginController);
 userRoutes.post("/logout", logoutController);
 userRoutes.get("/is-auth", AuthMiddleware, isAuthenticated);
+userRoutes.post("/refresh-token", refreshTokenController);
+userRoutes.post("/reset-password", sendResetPasswordOTPController)
+userRoutes.post("/verify-reset-password-otp", verifyForgotPasswordOTPController)
+userRoutes.post("/set-new-password", setNewPassword)
 
 export default userRoutes;

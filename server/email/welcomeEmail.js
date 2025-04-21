@@ -1,5 +1,5 @@
 const generateWelcomeEmail = (name, loginUrl) => {
-    return `
+  return `
     <!DOCTYPE html>
     <html>
       <head>
