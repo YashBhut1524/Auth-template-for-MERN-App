@@ -5,40 +5,35 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/api.js"
 
-export default function RegisterPage() {
-
-    const navigate = useNavigate()
+export default function LoginPage() {
+    const navigate = useNavigate();
 
     const [userData, setUserData] = useState({
-        name: "",
         email: "",
         password: "",
     });
 
-    const handleRegister = async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
 
         try {
             const response = await api.post(
-                `${import.meta.env.VITE_API_URL}/api/user/register`,
+                `${import.meta.env.VITE_API_URL}/api/user/login`,
                 userData,
                 { withCredentials: true }
             );
-
-            // console.log("response:", response);
 
             if (!response.data.success) {
                 toast.error(response.data.message);
             } else {
                 toast.success(response.data.message);
-                navigate("/")
+                navigate("/");
             }
         } catch (error) {
-            console.error("Registration failed:", error);
+            console.error("Login failed:", error);
             toast.error(error.response?.data?.message || "Something went wrong");
         }
     };
-
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -49,25 +44,10 @@ export default function RegisterPage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
             <div className="w-full max-w-md space-y-6 bg-white p-8 rounded-2xl shadow-lg">
                 <h1 className="text-2xl font-semibold text-center text-gray-900">
-                    Create your account
+                    Log in to your account
                 </h1>
 
-                <form className="space-y-4" onSubmit={handleRegister}>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Name
-                        </label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={userData.name}
-                            onChange={handleChange}
-                            placeholder="Your Name"
-                            required
-                            className="w-full px-4 py-2 border rounded-md bg-transparent"
-                        />
-                    </div>
-
+                <form className="space-y-4" onSubmit={handleLogin}>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Email
@@ -102,15 +82,16 @@ export default function RegisterPage() {
                         type="submit"
                         className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-900 transition"
                     >
-                        Register
+                        Log In
                     </button>
+
                     <p className="text-sm text-center text-gray-600">
-                        Already have an account?{" "}
+                        Don't have an account?{" "}
                         <span
-                            onClick={() => navigate("/login")}
+                            onClick={() => navigate("/register")}
                             className="text-blue-600 hover:underline cursor-pointer"
                         >
-                            Log in
+                            Register
                         </span>
                     </p>
                 </form>
