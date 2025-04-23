@@ -3,8 +3,8 @@ import Home from "../pages/Home.jsx";
 import VerifyEmail from "../pages/VerifyEmail.jsx";
 import RegisterPage from "../pages/RegisterPage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
-import ProtectedRedirect from "../components/ProtectedRedirect.jsx";
 import App from "../App.jsx"
+import ProtectedRedirect from "../components/ProtectedRedirect.jsx"
 
 const router = createBrowserRouter([
     {
@@ -19,7 +19,8 @@ const router = createBrowserRouter([
                     <ProtectedRedirect>
                         <RegisterPage />
                     </ProtectedRedirect>
-                ),
+                ) 
+                ,
             },
             {
                 path: "login",
@@ -27,7 +28,7 @@ const router = createBrowserRouter([
                     <ProtectedRedirect>
                         <LoginPage />
                     </ProtectedRedirect>
-                ),
+                ) 
             },
         ],
     },

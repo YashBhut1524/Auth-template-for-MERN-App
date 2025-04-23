@@ -7,30 +7,33 @@ const ProtectedRedirect = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        let isMounted = true;
+        const checkAuth = async () => {
+            try {
+                const response = await api.get("/api/user/is-auth");
+                console.log("Auth check result:", response.data);
 
-        api
-            .get("/api/auth")
-            .then(() => {
-                if (isMounted) {
-                    console.log("User is authenticated. Redirecting...");
-                    navigate("/");
+                if (response.data.success) {
+                    // ✅ Authenticated, redirect away from /login or /register
+                    navigate("/", { replace: true });
+                } else {
+                    // ❌ Not authenticated, allow access to login/register
+                    setChecking(false);
                 }
-            })
-            .catch((err) => {
-                console.log("User is not authenticated.", err);
-                if (isMounted) {
-                    setChecking(false); // allow render
-                }
-            });
-
-        return () => {
-            isMounted = false;
+            } catch (err) {
+                console.warn("Error during auth check:", err?.response?.data || err.message);
+                setChecking(false); // Assume unauthenticated if error
+            }
         };
+
+        checkAuth();
     }, [navigate]);
 
     if (checking) {
-        return <div className="text-center py-10">Loading...</div>;
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <p className="text-lg font-semibold">Checking authentication...</p>
+            </div>
+        );
     }
 
     return children;

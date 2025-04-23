@@ -8,6 +8,7 @@ import { generateOTP } from "../utils/generateOTP.js";
 import verifyEmail from "../email/verifyEmail.js";
 import resetPassOTPEmail from "../email/resetPasswordOTPEmail.js";
 
+const isProd = process.env.NODE_ENV === "production";
 //register new user 
 export const registerController = async (req, res) => {
     const { name, email, password } = req.body;
@@ -63,17 +64,20 @@ export const registerController = async (req, res) => {
         const accessToken = generateAccessToken(savedUser);
         const refreshToken = generateRefreshToken(savedUser);
 
+        // Cookie options
         const accessCookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: "None",
+            secure: isProd,
+            sameSite: isProd ? "None" : "Lax",
+            path: "/", //ensures cookie is available across all routes
             maxAge: 15 * 60 * 1000, // 15 minutes
         };
-
+        
         const refreshCookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: "None",
+            secure: isProd,
+            sameSite: isProd ? "None" : "Lax",
+            path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         };
 
@@ -140,18 +144,21 @@ export const verifyUserController = async (req, res) => {
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
 
+        // Cookie options
         const accessCookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: "None",
-            maxAge: 15 * 60 * 1000 // 15 minutes
+            secure: isProd,
+            sameSite: isProd ? "None" : "Lax",
+            path: "/", //ensures cookie is available across all routes
+            maxAge: 15 * 60 * 1000, // 15 minutes
         };
-
+        
         const refreshCookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: "None",
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            secure: isProd,
+            sameSite: isProd ? "None" : "Lax",
+            path: "/",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         };
 
         res.cookie("accessToken", accessToken, accessCookieOptions);
@@ -210,16 +217,18 @@ export const loginController = async (req, res) => {
         // Cookie options
         const accessCookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: "None",
-            maxAge: 15 * 60 * 1000 // 15 minutes
+            secure: isProd,
+            sameSite: isProd ? "None" : "Lax",
+            path: "/", //ensures cookie is available across all routes
+            maxAge: 15 * 60 * 1000, // 15 minutes
         };
-
+        
         const refreshCookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: "None",
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            secure: isProd,
+            sameSite: isProd ? "None" : "Lax",
+            path: "/",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         };
 
         // Set the cookies
@@ -341,14 +350,24 @@ export const resendVerificationController = async (req, res) => {
 // We are using middelware before this to check Au
 export const isAuthenticated = async (req, res) => {
     try {
-        return res.status(200).json({ success: true })
+        const { id, email } = req.user; // email is optional now
+
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                id,
+                email
+            }
+
+        });
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
-}
+};
 
 //refresh access token if access token is expired
 export const refreshTokenController = async (req, res) => {
@@ -510,12 +529,12 @@ export const verifyForgotPasswordOTPController = async (req, res) => {
         // OTP is correct, clear OTP data and mark verified
         await userModel.updateOne(
             { email },
-            { 
-                $set: { 
-                    passResetOtp: null, 
-                    passResetOtpExpiresAt: null, 
-                    verifiedResetOTP: true 
-                } 
+            {
+                $set: {
+                    passResetOtp: null,
+                    passResetOtpExpiresAt: null,
+                    verifiedResetOTP: true
+                }
             }
         );
 
