@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken"
 import { generateOTP } from "../utils/generateOTP.js";
 import verifyEmail from "../email/verifyEmail.js";
 import resetPassOTPEmail from "../email/resetPasswordOTPEmail.js";
+import { accessCookieOptions, refreshCookieOptions } from "../utils/cookieOptions.js";
 
 const isProd = process.env.NODE_ENV === "production";
 //register new user 
@@ -63,23 +64,6 @@ export const registerController = async (req, res) => {
         // Generate access and refresh tokens right after registration
         const accessToken = generateAccessToken(savedUser);
         const refreshToken = generateRefreshToken(savedUser);
-
-        // Cookie options
-        const accessCookieOptions = {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "None" : "Lax",
-            path: "/", //ensures cookie is available across all routes
-            maxAge: 15 * 60 * 1000, // 15 minutes
-        };
-        
-        const refreshCookieOptions = {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "None" : "Lax",
-            path: "/",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        };
 
         res.cookie("accessToken", accessToken, accessCookieOptions);
         res.cookie("refreshToken", refreshToken, refreshCookieOptions);
@@ -145,21 +129,21 @@ export const verifyUserController = async (req, res) => {
         const refreshToken = generateRefreshToken(user);
 
         // Cookie options
-        const accessCookieOptions = {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "None" : "Lax",
-            path: "/", //ensures cookie is available across all routes
-            maxAge: 15 * 60 * 1000, // 15 minutes
-        };
+        // const accessCookieOptions = {
+        //     httpOnly: true,
+        //     secure: isProd,
+        //     sameSite: isProd ? "None" : "Lax",
+        //     path: "/", //ensures cookie is available across all routes
+        //     maxAge: 15 * 60 * 1000, // 15 minutes
+        // };
         
-        const refreshCookieOptions = {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "None" : "Lax",
-            path: "/",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        };
+        // const refreshCookieOptions = {
+        //     httpOnly: true,
+        //     secure: isProd,
+        //     sameSite: isProd ? "None" : "Lax",
+        //     path: "/",
+        //     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        // };
 
         res.cookie("accessToken", accessToken, accessCookieOptions);
         res.cookie("refreshToken", refreshToken, refreshCookieOptions);
@@ -213,23 +197,6 @@ export const loginController = async (req, res) => {
 
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
-
-        // Cookie options
-        const accessCookieOptions = {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "None" : "Lax",
-            path: "/", //ensures cookie is available across all routes
-            maxAge: 15 * 60 * 1000, // 15 minutes
-        };
-        
-        const refreshCookieOptions = {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "None" : "Lax",
-            path: "/",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        };
 
         // Set the cookies
         res.cookie("accessToken", accessToken, accessCookieOptions);
@@ -348,25 +315,79 @@ export const resendVerificationController = async (req, res) => {
 };
 
 // We are using middelware before this to check Au
+const SECRET_KEY = process.env.SECRET_KEY_ACCESS_TOKEN;
+const REFRESH_KEY = process.env.SECRET_KEY_REFRESH_TOKEN;
+
 export const isAuthenticated = async (req, res) => {
-    try {
-        const { id, email } = req.user; // email is optional now
+    const accessToken = req.cookies?.accessToken;
+    const refreshToken = req.cookies?.refreshToken;
 
-
-        return res.status(200).json({
-            success: true,
-            data: {
-                id,
-                email
-            }
-
-        });
-    } catch (error) {
-        return res.status(500).json({
+    // If no tokens at all
+    if (!accessToken && !refreshToken) {
+        return res.status(401).json({
             success: false,
-            message: error.message,
+            message: "No tokens found",
         });
     }
+
+    // Step 1: Try to verify access token
+    if (accessToken) {
+        try {
+            const decoded = jwt.verify(accessToken, SECRET_KEY);
+            return res.status(200).json({
+                success: true,
+                data: {
+                    id: decoded.id,
+                    email: decoded.email,
+                },
+            });
+        } catch (accessError) {
+            // If token is invalid for any reason other than expiry, reject
+            if (!(accessError instanceof jwt.TokenExpiredError)) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Invalid access token",
+                    error: accessError.message,
+                });
+            }
+            // If token expired, move to refresh token logic
+        }
+    }
+
+    // Step 2: Use refresh token to generate new access token
+    if (refreshToken) {
+        try {
+            const refreshDecoded = jwt.verify(refreshToken, REFRESH_KEY);
+
+            const newAccessToken = generateAccessToken({
+                id: refreshDecoded.id,
+                email: refreshDecoded.email,
+            });
+
+            res.cookie("accessToken", newAccessToken, accessCookieOptions);
+
+            return res.status(200).json({
+                success: true,
+                data: {
+                    id: refreshDecoded.id,
+                    email: refreshDecoded.email,
+                    refreshed: true,
+                },
+            });
+        } catch (refreshError) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid refresh token",
+                error: refreshError.message,
+            });
+        }
+    }
+
+    // Step 3: All token validation failed
+    return res.status(401).json({
+        success: false,
+        message: "Unauthorized: token invalid or expired",
+    });
 };
 
 //refresh access token if access token is expired
@@ -403,12 +424,7 @@ export const refreshTokenController = async (req, res) => {
         );
 
         // Set new access token in cookies
-        res.cookie("accessToken", newAccessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "None",
-            maxAge: 1000 * 60 * 15, // 15 minutes
-        });
+        res.cookie("accessToken", newAccessToken, accessCookieOptions);
 
         return res.status(200).json({
             success: true,
@@ -604,3 +620,37 @@ export const setNewPassword = async (req, res) => {
         });
     }
 }
+
+export const getUserDetailsController = async (req, res) => {
+    try {
+        const userId = req.user?.id; // this is set in the middleware
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "User ID not found in request context",
+            });
+        }
+
+        const user = await userModel.findById(userId).select("-password"); // exclude sensitive data
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: user,
+        });
+    } catch (error) {
+        console.error("Error fetching user details:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch user details",
+            error: error.message,
+        });
+    }
+};

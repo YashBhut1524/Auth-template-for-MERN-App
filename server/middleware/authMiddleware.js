@@ -4,7 +4,9 @@ const SECRET_KEY = process.env.SECRET_KEY_ACCESS_TOKEN;
 
 function AuthMiddleware(req, res, next) {
     const token = req.cookies?.accessToken;
-
+    console.log("AuthMiddleWare Cookie", token);
+    
+    // If no access token is present in cookies
     if (!token) {
         return res.status(401).json({
             success: false,
@@ -13,6 +15,7 @@ function AuthMiddleware(req, res, next) {
     }
 
     try {
+        // Try verifying the access token
         const decoded = jwt.verify(token, SECRET_KEY);
         console.log("decoded:", decoded);
 
@@ -27,9 +30,8 @@ function AuthMiddleware(req, res, next) {
             // const userId = req.user.id; // use only id
             // or
             // const userEmail = req.user.email; // if needed
-            
-            next();
 
+            next();
         } else {
             return res.status(401).json({
                 success: false,
@@ -37,13 +39,16 @@ function AuthMiddleware(req, res, next) {
             });
         }
     } catch (error) {
+        // If the token has expired, notify the client
         if (error instanceof jwt.TokenExpiredError) {
             return res.status(401).json({
                 success: false,
-                message: "Access token expired",
+                message: "Access token expired", // This triggers token refresh in Axios interceptor
                 error: error.message,
             });
         }
+
+        // Token is invalid for other reasons (tampered, malformed, etc.)
         return res.status(401).json({
             success: false,
             message: "Invalid token",
