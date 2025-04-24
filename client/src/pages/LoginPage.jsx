@@ -112,7 +112,7 @@ export default function LoginPage() {
 
                 <div className="space-y-3">
                     <button
-                        onClick={() => (window.location.href = "/auth/google")}
+                        onClick={() => window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`}
                         className="flex items-center justify-center w-full gap-2 border px-4 py-2 rounded-md hover:bg-gray-100 transition"
                     >
                         <FcGoogle className="text-xl" />

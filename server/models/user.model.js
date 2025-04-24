@@ -12,7 +12,18 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: function () {
+            return this.provider !== "google";
+        }
+    },
+    provider: {
+        type: String,
+        enum: ["local", "google"],
+        default: "local"
+    },
+    picture: {
+        type: String,
+        default: ""
     },
     isVerified: {
         type: Boolean,
@@ -32,8 +43,7 @@ const userSchema = new mongoose.Schema({
     },
     verificationToken: {
         type: String,
-        default: "",
-        unique: true
+        default: ""
     },
     verificationTokenExpiration: {
         type: Number,

@@ -4,6 +4,7 @@ import "dotenv/config"
 import cookieParser from "cookie-parser"
 import connectDB from "./config/mongodb.js"
 import userRoutes from "./routes/user.route.js"
+import oauthRoutes from "./routes/auth.route.js"
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -19,6 +20,7 @@ app.use(cors({
 // API Endpoints
 app.get('/', (req, res) => res.send("Server Started"))
 app.use("/api/user", userRoutes)
+app.use("/api/auth", oauthRoutes);
 
 app.listen(port, () => {
     console.log(`Server is running on PORT:${port}`);
