@@ -11,7 +11,7 @@ const Home = () => {
     useEffect(() => {
         const fetchUserDetails = async () => {
             try {
-                const res = await api.get("/api/user/my-details");
+                const res = await api.get("/api/user/my-details", {withCredentials: true});
                 setUser(res.data.data);
             } catch (error) {
                 console.error("Failed to fetch user details:", error);

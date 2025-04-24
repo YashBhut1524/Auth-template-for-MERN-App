@@ -9,7 +9,7 @@ const ProtectedRedirect = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const response = await api.get("/api/user/is-auth");
+                const response = await api.get("/api/user/is-auth", {withCredentials: true});
                 // console.log("Auth check result:", response.data);
 
                 if (response.data.success) {
