@@ -131,7 +131,7 @@ export default function RegisterPage() {
                     </button>
 
                     <button
-                        onClick={() => (window.location.href = "/auth/github")}
+                        onClick={() => window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/github`}
                         className="flex items-center justify-center w-full gap-2 border px-4 py-2 rounded-md hover:bg-gray-100 transition"
                     >
                         <FaGithub className="text-xl" />
