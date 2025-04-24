@@ -23,12 +23,12 @@ const VerifyEmail = () => {
             }
 
             try {
-                const res = await axios.get(
+                const response = await axios.get(
                     `${import.meta.env.VITE_API_URL}/api/user/verify-user/${token}`,
                     { withCredentials: true }
                 );
 
-                if (res.data.success) {
+                if (response?.data?.success) {
                     setStatus("success");
 
                     // Use toast.promise to handle success
@@ -47,7 +47,7 @@ const VerifyEmail = () => {
                     }, 2000);
                 } else {
                     setStatus("error");
-                    toast.error(res.data.message || "Verification failed.");
+                    toast.error(response?.data?.message || "Verification failed.");
                 }
             } catch (error) {
                 setStatus("error");

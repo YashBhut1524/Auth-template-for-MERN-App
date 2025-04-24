@@ -23,14 +23,14 @@ export default function LoginPage() {
                 { withCredentials: true }
             );
 
-            if (!response.data.success) {
-                toast.error(response.data.message);
+            if (!response?.data?.success) {
+                toast.error(response?.data?.message);
             } else {
-                toast.success(response.data.message);
+                toast.success(response?.data?.message);
                 navigate("/");
             }
         } catch (error) {
-            console.error("Login failed:", error);
+            // console.error("Login failed:", error);
             toast.error(error.response?.data?.message || "Something went wrong");
         }
     };
@@ -84,7 +84,15 @@ export default function LoginPage() {
                     >
                         Log In
                     </button>
-
+                    <div className="flex justify-between items-center text-sm mb-4">
+                        <span></span>
+                        <span
+                            onClick={() => navigate("/forgot-password")}
+                            className="text-blue-600 hover:underline cursor-pointer"
+                        >
+                            Forgot password?
+                        </span>
+                    </div>
                     <p className="text-sm text-center text-gray-600">
                         Don't have an account?{" "}
                         <span

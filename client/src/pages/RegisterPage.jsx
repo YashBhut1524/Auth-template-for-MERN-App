@@ -27,10 +27,10 @@ export default function RegisterPage() {
 
             // console.log("response:", response);
 
-            if (!response.data.success) {
-                toast.error(response.data.message);
+            if (!response?.data?.success) {
+                toast.error(response?.data?.message);
             } else {
-                toast.success(response.data.message);
+                toast.success(response?.data?.message);
                 navigate("/")
             }
         } catch (error) {

@@ -5,6 +5,9 @@ import RegisterPage from "../pages/RegisterPage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
 import App from "../App.jsx"
 import ProtectedRedirect from "../components/ProtectedRedirect.jsx"
+import ForgotPassword from "../pages/ForgotPassword.jsx";
+import VerifyResetPasswordOTP from "../pages/VerifyResetPasswordOTP.jsx";
+import SetNewPassword from "../pages/SetNewPassword.jsx";
 
 const router = createBrowserRouter([
     {
@@ -30,6 +33,18 @@ const router = createBrowserRouter([
                     </ProtectedRedirect>
                 ) 
             },
+            {
+                path: "/forgot-password",
+                element: <ForgotPassword />
+            },
+            {
+                path: "/verify-forgot-password-otp",
+                element: <VerifyResetPasswordOTP />
+            },
+            {
+                path: "/set-new-password",
+                element: <SetNewPassword />
+            }
         ],
     },
 ]);

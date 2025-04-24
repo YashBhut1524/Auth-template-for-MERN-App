@@ -9,7 +9,10 @@ import verifyEmail from "../email/verifyEmail.js";
 import resetPassOTPEmail from "../email/resetPasswordOTPEmail.js";
 import { accessCookieOptions, refreshCookieOptions } from "../utils/cookieOptions.js";
 
-const isProd = process.env.NODE_ENV === "production";
+// We are using middelware before this to check Au
+const SECRET_KEY = process.env.SECRET_KEY_ACCESS_TOKEN;
+const REFRESH_KEY = process.env.SECRET_KEY_REFRESH_TOKEN;
+
 //register new user 
 export const registerController = async (req, res) => {
     const { name, email, password } = req.body;
@@ -314,9 +317,6 @@ export const resendVerificationController = async (req, res) => {
     }
 };
 
-// We are using middelware before this to check Au
-const SECRET_KEY = process.env.SECRET_KEY_ACCESS_TOKEN;
-const REFRESH_KEY = process.env.SECRET_KEY_REFRESH_TOKEN;
 
 export const isAuthenticated = async (req, res) => {
     const accessToken = req.cookies?.accessToken;
@@ -621,6 +621,7 @@ export const setNewPassword = async (req, res) => {
     }
 }
 
+//Get current loggedIn user details
 export const getUserDetailsController = async (req, res) => {
     try {
         const userId = req.user?.id; // this is set in the middleware
@@ -654,3 +655,38 @@ export const getUserDetailsController = async (req, res) => {
         });
     }
 };
+
+//get user details by email
+export const getUserDetailsByEmailController = async (req, res) => {
+    try {
+        const {email} = req.body 
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required.",
+            });
+        }
+
+        const user = await userModel.findOne({email}).select("-password"); // exclude sensitive data
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: user,
+        });
+    } catch (error) {
+        console.error("Error fetching user details:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch user details",
+            error: error.message,
+        });
+    }
+}
