@@ -13,10 +13,8 @@ const ProtectedRedirect = ({ children }) => {
                 // console.log("Auth check result:", response.data);
 
                 if (response.data.success) {
-                    // ✅ Authenticated, redirect away from /login or /register
                     navigate("/", { replace: true });
                 } else {
-                    // ❌ Not authenticated, allow access to login/register
                     setChecking(false);
                 }
             } catch (err) {
