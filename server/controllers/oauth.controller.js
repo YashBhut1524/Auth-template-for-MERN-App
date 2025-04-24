@@ -58,6 +58,8 @@ export const googleOAuthCallbackController = async (req, res) => {
         });
 
         const { email, name, picture } = userInfo;
+        // console.log(email);
+        
 
         let user = await userModel.findOne({ email });
 
@@ -69,6 +71,8 @@ export const googleOAuthCallbackController = async (req, res) => {
                 isVerified: true,
                 password: null,
                 provider: "google",
+                verificationToken: null,
+                verificationTokenExpiration: null
             });
 
             await user.save();
@@ -150,6 +154,8 @@ export const githubOAuthCallbackController = async (req, res) => {
                 isVerified: true,
                 password: null,
                 provider: "github",
+                verificationToken: null, // No token for OAuth users
+                verificationTokenExpiration: null // No expiration for OAuth users
             });
 
             await user.save();
