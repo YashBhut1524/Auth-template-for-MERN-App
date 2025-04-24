@@ -123,8 +123,8 @@ export const verifyUserController = async (req, res) => {
 
         // Mark the user as verified
         user.isVerified = true;
-        user.verificationToken = "";
-        user.verificationTokenExpiration = "";
+        user.verificationToken = undefined
+        user.verificationTokenExpiration = undefined
         await user.save();
 
         // Generate new tokens after verification (for refreshed authentication)

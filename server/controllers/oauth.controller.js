@@ -71,8 +71,8 @@ export const googleOAuthCallbackController = async (req, res) => {
                 isVerified: true,
                 password: null,
                 provider: "google",
-                verificationToken: null,
-                verificationTokenExpiration: null
+                verificationToken: undefined,
+                verificationTokenExpiration: undefined
             });
 
             await user.save();
@@ -110,6 +110,7 @@ export const githubOAuthCallbackController = async (req, res) => {
     }
 
     try {
+        // Step 1: Exchange code for access token
         const tokenResponse = await axios.post(
             "https://github.com/login/oauth/access_token",
             {
@@ -126,12 +127,14 @@ export const githubOAuthCallbackController = async (req, res) => {
 
         const access_token = tokenResponse.data.access_token;
 
+        // Step 2: Fetch GitHub user profile
         const { data: githubUser } = await axios.get("https://api.github.com/user", {
             headers: {
                 Authorization: `Bearer ${access_token}`,
             },
         });
 
+        // Step 3: Fetch user's verified email
         const { data: emails } = await axios.get("https://api.github.com/user/emails", {
             headers: {
                 Authorization: `Bearer ${access_token}`,
@@ -141,9 +144,10 @@ export const githubOAuthCallbackController = async (req, res) => {
         const primaryEmail = emails.find(email => email.primary && email.verified)?.email;
 
         if (!primaryEmail) {
-            throw new Error("No verified email found");
+            throw new Error("No verified primary email found.");
         }
 
+        // Step 4: Check if user exists or create new user
         let user = await userModel.findOne({ email: primaryEmail });
 
         if (!user) {
@@ -154,13 +158,15 @@ export const githubOAuthCallbackController = async (req, res) => {
                 isVerified: true,
                 password: null,
                 provider: "github",
-                verificationToken: null, // No token for OAuth users
-                verificationTokenExpiration: null // No expiration for OAuth users
+                // Avoid inserting null values for unique fields
+                verificationToken: undefined,
+                verificationTokenExpiration: undefined
             });
 
             await user.save();
         }
 
+        // Step 5: Generate and set tokens
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
 
@@ -173,3 +179,4 @@ export const githubOAuthCallbackController = async (req, res) => {
         return res.redirect(`${process.env.CLIENT_URL}/login?error=true`);
     }
 };
+
