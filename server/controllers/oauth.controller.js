@@ -61,7 +61,7 @@ export const googleOAuthCallbackController = async (req, res) => {
         let user = await userModel.findOne({ email });
 
         if (!user) {
-            user = await userModel.create({
+            newUser = await userModel({
                 email,
                 name,
                 picture,
@@ -69,6 +69,8 @@ export const googleOAuthCallbackController = async (req, res) => {
                 password: null,
                 provider: "google",
             });
+            
+            await newUser.save();
         }
 
         const accessToken = generateAccessToken(user);
@@ -140,7 +142,7 @@ export const githubOAuthCallbackController = async (req, res) => {
         let user = await userModel.findOne({ email: primaryEmail });
 
         if (!user) {
-            user = await userModel.create({
+            newUser = await userModel({
                 email: primaryEmail,
                 name: githubUser.name || githubUser.login,
                 picture: githubUser.avatar_url,
@@ -148,6 +150,8 @@ export const githubOAuthCallbackController = async (req, res) => {
                 password: null,
                 provider: "github",
             });
+
+            await newUser.save();
         }
 
         const accessToken = generateAccessToken(user);
