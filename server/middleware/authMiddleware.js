@@ -4,7 +4,7 @@ const SECRET_KEY = process.env.SECRET_KEY_ACCESS_TOKEN;
 
 function AuthMiddleware(req, res, next) {
     const token = req.cookies?.accessToken;
-    console.log("AuthMiddleWare Cookie", token);
+    // console.log("AuthMiddleWare Cookie", token);
     
     // If no access token is present in cookies
     if (!token) {
@@ -17,7 +17,7 @@ function AuthMiddleware(req, res, next) {
     try {
         // Try verifying the access token
         const decoded = jwt.verify(token, SECRET_KEY);
-        console.log("decoded:", decoded);
+        // console.log("decoded:", decoded);
 
         if (decoded?.id && decoded?.email) {
             // Attach the decoded user info to req.user

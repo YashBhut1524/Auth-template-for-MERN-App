@@ -10,7 +10,7 @@ const ProtectedRedirect = ({ children }) => {
         const checkAuth = async () => {
             try {
                 const response = await api.get("/api/user/is-auth");
-                console.log("Auth check result:", response.data);
+                // console.log("Auth check result:", response.data);
 
                 if (response.data.success) {
                     // ✅ Authenticated, redirect away from /login or /register

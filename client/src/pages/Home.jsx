@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import api from '../utils/api'; // assuming this is your axios instance
+import { useNavigate } from 'react-router-dom';
+import api from '../utils/api';
+import LogoutButton from '../components/LogoutButton';
 
 const Home = () => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // Start loading as true
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserDetails = async () => {
@@ -13,7 +16,7 @@ const Home = () => {
             } catch (error) {
                 console.error("Failed to fetch user details:", error);
             } finally {
-                setLoading(false); // Set loading to false when done
+                setLoading(false);
             }
         };
 
@@ -21,17 +24,31 @@ const Home = () => {
     }, []);
 
     return (
-        <div className='bg-green-500 p-4'>
-            <h1>Home</h1>
+        <div className="bg-green-500 p-4 min-h-screen">
+            <h1 className="text-xl font-semibold mb-4">Home</h1>
             {loading ? (
                 <p>Loading user details...</p>
             ) : user ? (
-                <div>
+                <div className="space-y-2">
                     <p>Name: {user.name}</p>
                     <p>Email: {user.email}</p>
+                    <LogoutButton onLogout={() => setUser(null)} />
                 </div>
             ) : (
-                <p>Failed to load user details</p> // Show error message if user is null
+                <div className="space-x-4">
+                    <button
+                        onClick={() => navigate("/login")}
+                        className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+                    >
+                        Login
+                    </button>
+                    <button
+                        onClick={() => navigate("/register")}
+                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                        Register
+                    </button>
+                </div>
             )}
         </div>
     );

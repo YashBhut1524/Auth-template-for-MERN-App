@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
                 { withCredentials: true }
             )
 
-            console.log("response:", response)
+            // console.log("response:", response)
             if(response?.data?.success) {
                 toast.success("OTP is sent to your email")
                 // navigate("/verify-forgot-password-otp", { state: { email }})

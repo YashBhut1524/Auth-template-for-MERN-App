@@ -46,7 +46,7 @@ export const registerController = async (req, res) => {
             verificationToken, // Store the token
             verificationTokenExpiration: Date.now() + 3600000 // Token expires in 1 hour
         });
-        console.log("About to save user:", newUser);
+        // console.log("About to save user:", newUser);
 
         const savedUser = await newUser.save();
         console.log("Saved user:", savedUser);
@@ -227,19 +227,9 @@ export const loginController = async (req, res) => {
 export const logoutController = async (req, res) => {
     try {
         // Clear both accessToken and refreshToken cookies from the client's browser
-        res.clearCookie("accessToken", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // Ensure secure cookie in production
-            sameSite: "None", // Cross-origin support
-            path: "/", // Make sure to clear the cookie across all paths
-        });
+        res.clearCookie("accessToken", accessCookieOptions);
 
-        res.clearCookie("refreshToken", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // Ensure secure cookie in production
-            sameSite: "None", // Cross-origin support
-            path: "/", // Make sure to clear the cookie across all paths
-        });
+        res.clearCookie("refreshToken", refreshCookieOptions);
 
         return res.status(200).json({
             success: true,
@@ -406,7 +396,7 @@ export const refreshTokenController = async (req, res) => {
             incomingRefreshToken,
             process.env.SECRET_KEY_REFRESH_TOKEN
         );
-        console.log(decodedToken)
+        // console.log(decodedToken)
         const user = await userModel.findById(decodedToken?.id);
 
         if (!user) {
