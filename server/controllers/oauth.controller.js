@@ -9,6 +9,7 @@ const SERVER_URL = process.env.SERVER_URL;
 const REDIRECT_SUCCESS = `${FRONTEND_URL}/oauth-success`;
 const REDIRECT_ERROR = `${FRONTEND_URL}/login?error=true`;
 
+// Google OAuth
 export const googleOAuthController = (req, res) => {
     const redirectUri = `${SERVER_URL}/api/auth/google/callback`;
 
@@ -61,7 +62,7 @@ export const googleOAuthCallbackController = async (req, res) => {
         let user = await userModel.findOne({ email });
 
         if (!user) {
-            newUser = await userModel({
+            user = new userModel({
                 email,
                 name,
                 picture,
@@ -69,8 +70,8 @@ export const googleOAuthCallbackController = async (req, res) => {
                 password: null,
                 provider: "google",
             });
-            
-            await newUser.save();
+
+            await user.save();
         }
 
         const accessToken = generateAccessToken(user);
@@ -86,7 +87,7 @@ export const googleOAuthCallbackController = async (req, res) => {
     }
 };
 
-// Github OAuth
+// GitHub OAuth
 export const githubOAuthController = (req, res) => {
     const redirectUri = `${process.env.SERVER_URL}/api/auth/github/callback`;
     const url = new URL("https://github.com/login/oauth/authorize");
@@ -142,7 +143,7 @@ export const githubOAuthCallbackController = async (req, res) => {
         let user = await userModel.findOne({ email: primaryEmail });
 
         if (!user) {
-            newUser = await userModel({
+            user = new userModel({
                 email: primaryEmail,
                 name: githubUser.name || githubUser.login,
                 picture: githubUser.avatar_url,
@@ -151,7 +152,7 @@ export const githubOAuthCallbackController = async (req, res) => {
                 provider: "github",
             });
 
-            await newUser.save();
+            await user.save();
         }
 
         const accessToken = generateAccessToken(user);
