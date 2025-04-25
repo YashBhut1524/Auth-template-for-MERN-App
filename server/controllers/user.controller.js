@@ -42,9 +42,10 @@ export const registerController = async (req, res) => {
             name,
             email,
             password: hashedPassword,
+            provider: "local",
             isVerified: false,
-            verificationToken, // Store the token
-            verificationTokenExpiration: Date.now() + 3600000 // Token expires in 1 hour
+            verificationToken,
+            verificationTokenExpiration: Date.now() + 3600000
         });
         // console.log("About to save user:", newUser);
 

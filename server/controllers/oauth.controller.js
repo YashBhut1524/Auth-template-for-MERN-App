@@ -104,6 +104,9 @@ export const githubOAuthController = (req, res) => {
 };
 
 export const githubOAuthCallbackController = async (req, res) => {
+    console.log("GitHub callback hit ✅");
+    console.log("Query code:", req.query.code);
+
     const code = req.query.code;
     if (!code) {
         return res.redirect(`${process.env.CLIENT_URL}/login?error=true`);
@@ -158,7 +161,6 @@ export const githubOAuthCallbackController = async (req, res) => {
                 isVerified: true,
                 password: null,
                 provider: "github",
-                // Avoid inserting null values for unique fields
                 verificationToken: undefined,
                 verificationTokenExpiration: undefined
             });
