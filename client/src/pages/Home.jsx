@@ -1,30 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
 import LogoutButton from '../components/LogoutButton';
+import { useUser } from '../contexts/UserContext';
 
 const Home = () => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-
-    const fetchUserDetails = async () => {
-        setLoading(true);
-        try {
-            const res = await api.get("/api/user/my-details", { withCredentials: true });
-            setUser(res.data.data);
-            console.log("User data:", res.data.data);
-        } catch (error) {
-            console.error("Failed to fetch user details:", error);
-            setUser(null);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchUserDetails();
-    }, []);
+    const { user, loading, fetchUserDetails, setUser } = useUser();
 
     return (
         <div className="bg-green-500 p-4 min-h-screen">
@@ -61,11 +42,11 @@ const Home = () => {
                         Register
                     </button>
                     <button
-                            onClick={fetchUserDetails}
-                            className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600"
-                        >
-                            Refetch User Data
-                        </button>
+                        onClick={fetchUserDetails}
+                        className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600"
+                    >
+                        Refetch User Data
+                    </button>
                 </div>
             )}
         </div>

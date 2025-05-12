@@ -3,10 +3,13 @@ import './index.css';
 import { RouterProvider } from 'react-router-dom';
 import router from './routes/index.jsx';
 import { Toaster } from 'react-hot-toast';
+import { UserProvider } from './contexts/UserContext'; // Import your context provider
 
 createRoot(document.getElementById('root')).render(
   <>
-    <RouterProvider router={router} />
-    <Toaster />
+    <UserProvider>
+      <RouterProvider router={router} />
+      <Toaster />
+    </UserProvider>
   </>
 );
