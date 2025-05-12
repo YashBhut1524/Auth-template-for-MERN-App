@@ -8,31 +8,43 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchUserDetails = async () => {
-            try {
-                const res = await api.get("/api/user/my-details", {withCredentials: true});
-                setUser(res.data.data);
-            } catch (error) {
-                console.error("Failed to fetch user details:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchUserDetails = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get("/api/user/my-details", { withCredentials: true });
+            setUser(res.data.data);
+            console.log("User data:", res.data.data);
+        } catch (error) {
+            console.error("Failed to fetch user details:", error);
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchUserDetails();
     }, []);
 
     return (
         <div className="bg-green-500 p-4 min-h-screen">
             <h1 className="text-xl font-semibold mb-4">Home</h1>
+
             {loading ? (
                 <p>Loading user details...</p>
             ) : user ? (
-                <div className="space-y-2">
+                <div className="space-y-4">
                     <p>Name: {user.name}</p>
                     <p>Email: {user.email}</p>
-                    <LogoutButton onLogout={() => setUser(null)} />
+                    <div className="flex gap-2">
+                        <LogoutButton onLogout={() => setUser(null)} />
+                        <button
+                            onClick={fetchUserDetails}
+                            className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600"
+                        >
+                            Refetch User Data
+                        </button>
+                    </div>
                 </div>
             ) : (
                 <div className="space-x-4">
@@ -48,6 +60,12 @@ const Home = () => {
                     >
                         Register
                     </button>
+                    <button
+                            onClick={fetchUserDetails}
+                            className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600"
+                        >
+                            Refetch User Data
+                        </button>
                 </div>
             )}
         </div>

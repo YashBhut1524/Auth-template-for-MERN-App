@@ -10,20 +10,18 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // If token expired and hasn't already tried to refresh
+        // Retry once on 401 Unauthorized
         if (
             error.response?.status === 401 &&
-            !originalRequest._retry &&
-            error.response.message === "Access token expired"
+            !originalRequest._retry
         ) {
             originalRequest._retry = true;
-
             try {
                 await api.post("/api/user/refresh-token");
-                return api(originalRequest); // Retry the original request
+                return api(originalRequest); // Retry original request
             } catch (err) {
-                // Optional: redirect to login if refresh fails
                 console.error("Token refresh failed:", err);
+                // Optional: redirect to login
             }
         }
 
@@ -31,4 +29,4 @@ api.interceptors.response.use(
     }
 );
 
-export default api 
+export default api;
